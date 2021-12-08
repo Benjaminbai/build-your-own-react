@@ -22,7 +22,16 @@
   5. 挂载到dom树
 
 ### Step III: Concurrent Mode
+  1. render中的递归存在问题，导致不可中断，因此需要把递归变成可中断的方式，
+  2. demo使用requestIdleCallback，执行后会产生一个deadline
+  3. deadline不足后，中断当前unitwork，开始下一个unitwork
+
 ### Step IV: Fibers
+  1. render时初始化第一个nextUnitOfWork
+  2. 每一个performUnitOfWork中，创建新的fiber，根据是不是子节点，决定是child节点，还是兄弟节点
+  3. 深度优先遍历，有child返回child，没child，有sibling，返回sibling
+  4. 没有sibling，返回parent
+  
 ### Step V: Render and Commit Phases
 ### Step VI: Reconciliation
 ### Step VII: Function Components
