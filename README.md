@@ -33,6 +33,11 @@
   4. 没有sibling，返回parent
   
 ### Step V: Render and Commit Phases
+  1. performUnitOfWork存在问题，如果任务中断了，页面没有完全更新
+  2. 把里面dom操作抽离
+  3. 记录fiber的根
+  4. concurrent阶段判断根有没有完整，完整了后执行commit操作
+  
 ### Step VI: Reconciliation
 ### Step VII: Function Components
 ### Step VIII: Hooks
