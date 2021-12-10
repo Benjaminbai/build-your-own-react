@@ -39,5 +39,6 @@
   4. concurrent阶段判断根有没有完整，完整了后执行commit操作
   
 ### Step VI: Reconciliation
+  1. 得重新看一边
 ### Step VII: Function Components
 ### Step VIII: Hooks
