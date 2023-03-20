@@ -20,9 +20,11 @@
 
 let nextUnitOfwork = null
 let wipRoot = null
+let currentRoot = null
 
 function commitRoot() {
     commitWork(wipRoot.child)
+    currentRoot = wipRoot
     wipRoot = null
 }
 
@@ -56,24 +58,8 @@ function performUnitOfWork(fiber) {
     }
 
     const elememnts = fiber.parent.children
-    let index = 0
-    let prevSibling = null
-    while (index < elememnts.length) {
-        const element = elememnts[index]
-        const newFiber = {
-            type: element.type,
-            props: element.props,
-            parent: fiber,
-            dom: null
-        }
-        if (index === 0) {
-            fiber.child = newFiber
-        } else {
-            prevSibling.sibling = newFiber
-        }
-        prevSibling = newFiber
-        index++
-    }
+    reconcileChildren(fiber, elememnts)
+
     if (fiber.child) {
         return fiber.child
     }
@@ -83,6 +69,39 @@ function performUnitOfWork(fiber) {
             return nextFiber.sibling
         }
         nextFiber = nextFiber.parent
+    }
+}
+
+function reconcileChildren(wipFiber, elememnts) {
+    let index = 0
+    let oldFiber = wipFiber.alternate && wipFiber.alternate.child
+    let prevSibling = null
+    while (index < elememnts.length || oldFiber != null) {
+        const element = elememnts[index]
+        let newFilber = null
+
+        const sameType = oldFiber && element && element.type === oldFiber.type
+        if (sameType) {
+            // TODO update the node
+            newFilber = {
+                type: oldFiber.type,
+                props: element.props,
+                dom: oldFiber.dom,
+                parent: wipFiber,
+                alternate: oldFiber,
+                effectTag: "UPDATE"
+            }
+        }
+        if (element && !sameType) {
+            // TODO add this node
+        }
+        if (oldFiber && !sameType) {
+            // TODO delete the oldFiber's node
+        }
+
+        if (oldFiber) {
+            oldFiber = oldFiber.sibling
+        }
     }
 }
 
@@ -128,7 +147,8 @@ function render(element, container) {
         dom: container,
         props: {
             children: [element]
-        }
+        },
+        alternate: currentRoot
     }
     nextUnitOfwork = wipRoot
 }
