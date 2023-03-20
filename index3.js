@@ -21,11 +21,17 @@
 let nextUnitOfwork = null
 let wipRoot = null
 let currentRoot = null
+let deletions = []
 
 function commitRoot() {
+    deletions.forEach(commitWork)
     commitWork(wipRoot.child)
     currentRoot = wipRoot
     wipRoot = null
+}
+
+function updateDom(dom, prevProps, nextProps) {
+    
 }
 
 function commitWork(fiber) {
@@ -33,7 +39,14 @@ function commitWork(fiber) {
         return
     }
     const domParent = fiber.parent.dom
-    domParent.appendChild(fiber.dom)
+
+    if(fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
+        domParent.appendChild(fiber.dom)
+    }else if(fiber.effectTag === 'DELETION') {
+        domParent.removeChild(fiber.dom)
+    }else if(fiber.effectTag === 'UPDATE' && fiber.dom != null) {
+        updateDom(fiber.dom, fiber.alternate.props, fiber.props)
+    }
     commitWork(fiber.child)
     commitWork(fiber.sibling)
 }
@@ -75,7 +88,6 @@ function performUnitOfWork(fiber) {
 function reconcileChildren(wipFiber, elememnts) {
     let index = 0
     let oldFiber = wipFiber.alternate && wipFiber.alternate.child
-    let prevSibling = null
     while (index < elememnts.length || oldFiber != null) {
         const element = elememnts[index]
         let newFilber = null
@@ -94,9 +106,19 @@ function reconcileChildren(wipFiber, elememnts) {
         }
         if (element && !sameType) {
             // TODO add this node
+            newFilber = {
+                type: element.type,
+                props: element.props,
+                dom: null,
+                parent: wipFiber,
+                alternate: null,
+                effectTag: 'PLACEMENT'
+            }
         }
         if (oldFiber && !sameType) {
             // TODO delete the oldFiber's node
+            oldFiber.effectTag = 'DELETION'
+            deletions.push(oldFiber)
         }
 
         if (oldFiber) {
@@ -150,6 +172,7 @@ function render(element, container) {
         },
         alternate: currentRoot
     }
+    deletions = []
     nextUnitOfwork = wipRoot
 }
 
