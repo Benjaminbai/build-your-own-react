@@ -21,7 +21,7 @@
 let nextUnitOfwork = null
 let wipRoot = null
 let currentRoot = null
-let deletions = []
+let deletions = null
 
 function commitRoot() {
     deletions.forEach(commitWork)
@@ -86,7 +86,7 @@ function commitWork(fiber) {
 
 function workLoop(deadline) {
     let shouldYield = false
-    while (nextUnitOfwork && shouldYield) {
+    while (nextUnitOfwork && !shouldYield) {
         nextUnitOfwork = performUnitOfWork(nextUnitOfwork)
         shouldYield = deadline.timeRemaining() < 1
 
@@ -98,13 +98,14 @@ function workLoop(deadline) {
     requestIdleCallback(workLoop)
 }
 requestIdleCallback(workLoop)
+
 function performUnitOfWork(fiber) {
     if (!fiber.dom) {
         fiber.dom = createDom(fiber)
     }
 
-    const elememnts = fiber.parent.children
-    reconcileChildren(fiber, elememnts)
+    const elements = fiber.props.children
+    reconcileChildren(fiber, elements)
 
     if (fiber.child) {
         return fiber.child
@@ -118,17 +119,18 @@ function performUnitOfWork(fiber) {
     }
 }
 
-function reconcileChildren(wipFiber, elememnts) {
+function reconcileChildren(wipFiber, elements) {
     let index = 0
     let oldFiber = wipFiber.alternate && wipFiber.alternate.child
-    while (index < elememnts.length || oldFiber != null) {
-        const element = elememnts[index]
-        let newFilber = null
+    let prevSibling = null
+    while (index < elements.length || oldFiber != null) {
+        const element = elements[index]
+        let newFiber = null
 
         const sameType = oldFiber && element && element.type === oldFiber.type
         if (sameType) {
             // TODO update the node
-            newFilber = {
+            newFiber = {
                 type: oldFiber.type,
                 props: element.props,
                 dom: oldFiber.dom,
@@ -139,7 +141,7 @@ function reconcileChildren(wipFiber, elememnts) {
         }
         if (element && !sameType) {
             // TODO add this node
-            newFilber = {
+            newFiber = {
                 type: element.type,
                 props: element.props,
                 dom: null,
@@ -220,13 +222,28 @@ const Didact = {
     render
 }
 
-/** @jsx Didact.createElement */
-const element = (
-    <div id="foo">
-        <a>bar</a>
-        <b />
-    </div>
-)
 
+// const element = (
+//     <div id="foo">
+//         <a>bar</a>
+//         <b />
+//     </div>
+// )
+
+/** @jsx Didact.createElement */
 const container = document.getElementById("root")
-Didact.render(element, container)
+const updateValue = e => {
+    rerender(e.target.value)
+}
+
+const rerender = value => {
+    const element = (
+        <div>
+            <input onInput={updateValue} value={value} />
+            <h2>{value}</h2>
+        </div>
+    )
+    Didact.render(element, container)
+}
+
+rerender("World")
