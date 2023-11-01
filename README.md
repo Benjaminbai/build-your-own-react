@@ -39,6 +39,18 @@
   4. concurrent阶段判断根有没有完整，完整了后执行commit操作
   
 ### Step VI: Reconciliation
-  1. 得重新看一边
+  1. fiber中要保存老节点，进行新老fiber的对比
+  2. 如果类型相同，就更新节点
+  3. 如果节点不同，且存在新节点，就增加
+  4. 如果有老节点，且类型不相同，就删除
+  5. 更新节点时，还需要注意属性的替换，如果是事件类型，还要添加事件
+
 ### Step VII: Function Components
+  1. 如果是函数类型的组件，需要区分开来
+  2. 函数组建的处理需要通过fiber.type拿到组件类型
 ### Step VIII: Hooks
+  1. 需要设置全局index变量
+  2. 记录当前的fiber，每个fiber都准备一个hooks数组保存起来
+  3. 把hook对象push到hooks中
+  4. index++，然后返回hook中的state
+  5. 在hook中再使用queue数组保存每一次的action，然后执行actions数组，再返回当前的action
