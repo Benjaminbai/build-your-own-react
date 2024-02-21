@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
 
-  entry: './index4.js',
+  entry: './index5.js',
   output: {
     filename: 'built.js',
     path: resolve(__dirname, 'build')
