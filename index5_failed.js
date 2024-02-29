@@ -309,7 +309,7 @@ const Didact = {
 //     React.createElement("b")
 // )
 
-/* @jsx Didact.createElement */
+
 // const element = (
 //     <div id="foo">
 //         <a>bar</a>
@@ -323,6 +323,7 @@ const Didact = {
 
 // const element = <App name="foo" />
 
+/**  @jsx Didact.createElement */
 function Counter() {
     const [state, setState] = Didact.useState(1)
 
